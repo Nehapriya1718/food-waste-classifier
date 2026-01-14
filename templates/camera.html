@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera - Food Waste Classifier</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .title-bar {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .title-content h1 {
+            font-size: 2rem;
+            margin: 0 0 10px 0;
+            font-weight: 700;
+        }
+
+        .title-subtitle {
+            font-size: 1.125rem;
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border: 2px solid #D1D5DB;
+            border-radius: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: white;
+            color: #374151;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            border-color: #2563EB;
+            color: #2563EB;
+        }
+
+        .nav-btn.active {
+            background: #2563EB;
+            color: white;
+            border-color: #2563EB;
+        }
+
+        .nav-icon { font-size: 1.25rem; }
+
+        .content-section {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 40px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .camera-container { text-align: center; }
+
+        #video {
+            width: 100%;
+            max-width: 640px;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            display: none;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn-primary, .btn-success, .btn-secondary {
+            padding: 14px 36px;
+            border: none;
+            border-radius: 1rem;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary { background: #2563EB; color: white; }
+        .btn-success { background: #10B981; color: white; }
+        .btn-secondary { background: #EF4444; color: white; }
+
+        .btn-primary:hover { background: #1E40AF; transform: translateY(-2px); }
+        .btn-success:hover { background: #059669; transform: translateY(-2px); }
+        .btn-secondary:hover { background: #DC2626; transform: translateY(-2px); }
+
+        .captured-image {
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .captured-image img {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading-spinner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-spinner p {
+            color: white;
+            margin-top: 20px;
+            font-size: 1.25rem;
+            font-weight: 500;
+        }
+
+        .camera-placeholder {
+            background: #F3F4F6;
+            padding: 60px 30px;
+            border-radius: 1rem;
+            text-align: center;
+        }
+
+        .camera-placeholder-icon { font-size: 5rem; margin-bottom: 20px; }
+
+        .camera-placeholder h3 {
+            font-size: 1.75rem;
+            color: #111827;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .camera-placeholder p {
+            color: #6B7280;
+            margin-bottom: 30px;
+            font-size: 1.05rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="title-bar">
+        <div class="title-content">
+            <h1>Smart Food Waste Classifier</h1>
+            <p class="title-subtitle">AI-Powered Waste Sorting Assistant</p>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="nav-menu">
+            <button class="nav-btn" onclick="window.location.href='/dashboard'">
+                <span class="nav-icon">🏠</span> Home
+            </button>
+            <button class="nav-btn" onclick="window.location.href='/classify/upload'">
+                <span class="nav-icon">📁</span> Upload Image
+            </button>
+            <button class="nav-btn active">
+                <span class="nav-icon">📷</span> Camera
+            </button>
+            <button class="nav-btn" onclick="window.location.href='/logout'">
+                <span class="nav-icon">🚪</span> Logout
+            </button>
+        </div>
+
+        <div class="content-section">
+            <div class="camera-container">
+                <div class="camera-placeholder" id="cameraPlaceholder">
+                    <div class="camera-placeholder-icon">📷</div>
+                    <h3>Camera Waste Classifier</h3>
+                    <p>Click the button below to start your camera</p>
+                    <button id="startCamera" class="btn-primary">Start Camera</button>
+                </div>
+
+                <video id="video" autoplay playsinline></video>
+                <canvas id="canvas" style="display: none;"></canvas>
+                
+                <div class="camera-controls">
+                    <button id="captureBtn" class="btn-success" style="display: none;">📸 Capture Photo</button>
+                    <button id="retakeBtn" class="btn-secondary" style="display: none;">🔄 Retake</button>
+                </div>
+            </div>
+
+            <div id="capturedImage" class="captured-image">
+                <img id="capturedPhoto" src="" alt="Captured">
+            </div>
+        </div>
+
+        <div id="loadingSpinner" class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Analyzing waste...</p>
+        </div>
+    </div>
+
+    <script>
+        console.log('Camera page JavaScript loaded');
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing camera...');
+
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const startBtn = document.getElementById('startCamera');
+            const captureBtn = document.getElementById('captureBtn');
+            const retakeBtn = document.getElementById('retakeBtn');
+            const capturedImage = document.getElementById('capturedImage');
+            const capturedPhoto = document.getElementById('capturedPhoto');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+
+            let stream = null;
+
+            startBtn.addEventListener('click', async function() {
+                console.log('Start Camera button clicked!');
+                
+                try {
+                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                        alert('Camera not supported! Please use HTTPS or localhost.');
+                        return;
+                    }
+
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { facingMode: 'environment' } 
+                    });
+                    
+                    video.srcObject = stream;
+                    cameraPlaceholder.style.display = 'none';
+                    video.style.display = 'block';
+                    captureBtn.style.display = 'inline-block';
+                    
+                } catch (err) {
+                    alert('Camera access failed: ' + err.message);
+                }
+            });
+
+            captureBtn.addEventListener('click', function() {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                
+                const imageData = canvas.toDataURL('image/jpeg', 0.9);
+                capturedPhoto.src = imageData;
+                
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                
+                video.style.display = 'none';
+                captureBtn.style.display = 'none';
+                capturedImage.style.display = 'block';
+                retakeBtn.style.display = 'inline-block';
+                
+                classifyCamera(imageData);
+            });
+
+            retakeBtn.addEventListener('click', async function() {
+                capturedImage.style.display = 'none';
+                retakeBtn.style.display = 'none';
+                
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { facingMode: 'environment' } 
+                    });
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    captureBtn.style.display = 'inline-block';
+                } catch (err) {
+                    alert('Failed to restart camera: ' + err.message);
+                }
+            });
+
+            async function classifyCamera(imageData) {
+                loadingSpinner.style.display = 'flex';
+
+                try {
+                    const response = await fetch('/api/classify/camera', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: imageData })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.redirect) {
+                        window.location.href = result.redirect;
+                        return;
+                    }
+
+                    if (response.ok) {
+                        window.location.href = '/result';
+                    } else {
+                        alert('ERROR: ' + (result.error || 'Unknown error'));
+                        loadingSpinner.style.display = 'none';
+                    }
+                } catch (error) {
+                    alert('FAILED: ' + error.message);
+                    loadingSpinner.style.display = 'none';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

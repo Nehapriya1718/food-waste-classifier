@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Food Waste Classifier - Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    
+    <div class="title-bar">
+        <div class="title-content">
+            <h1>Smart Food Waste Classifier</h1>
+            <p class="title-subtitle">AI-Powered Waste Sorting Assistant</p>
+        </div>
+    </div>
+
+    <div class="main-container">
+    
+        <h2 class="page-title">Choose How to Classify Your Waste</h2>
+
+
+        <div class="options-grid">
+        
+            <div class="option-card" onclick="window.location.href='/classify/upload'">
+                <div class="option-icon">📁</div>
+                <h4>Upload Image</h4>
+                <p>Select an image from your device to classify waste type</p>
+                <button class="option-btn">Get Started</button>
+            </div>
+
+        
+            <div class="option-card" onclick="window.location.href='/classify/camera'">
+                <div class="option-icon">📷</div>
+                <h4>Use Camera</h4>
+                <p>Take a photo directly using your camera for instant classification</p>
+                <button class="option-btn">Open Camera</button>
+            </div>
+        </div>
+
+    
+        <div class="info-section">
+            <h3>How It Works</h3>
+            <div class="steps-grid">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <h5>Choose Method</h5>
+                    <p>Upload an image or use your camera</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <h5>AI Analysis</h5>
+                    <p>Our model analyzes the waste image</p>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <h5>Get Results</h5>
+                    <p>Receive classification and disposal tips</p>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="logout-section">
+            <p>Logged in as <strong>{{ username }}</strong></p>
+            <button class="btn-logout" onclick="window.location.href='/logout'">Logout</button>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,233 @@
+upload.html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Image - Food Waste Classifier</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .nav-menu {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border: 2px solid #D1D5DB;
+            border-radius: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: white;
+            color: #374151;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-btn:hover {
+            border-color: #2563EB;
+            color: #2563EB;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-btn.active {
+            background: #2563EB;
+            color: white;
+            border-color: #2563EB;
+        }
+
+        .nav-icon {
+            font-size: 1.25rem;
+        }
+
+        .content-section {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 40px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .upload-box {
+            border: 2px dashed #D1D5DB;
+            border-radius: 1rem;
+            padding: 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #F9FAFB;
+        }
+
+        .upload-box:hover {
+            border-color: #2563EB;
+            background: white;
+        }
+
+        .upload-icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+
+        .upload-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #111827;
+            font-weight: 600;
+        }
+
+        .upload-content p {
+            color: #6B7280;
+            margin-bottom: 25px;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            padding: 12px 32px;
+            background: #2563EB;
+            color: white;
+            border: none;
+            border-radius: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:hover {
+            background: #1E40AF;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-preview {
+            text-align: center;
+            display: none;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 350px;
+            border-radius: 1rem;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary {
+            padding: 12px 32px;
+            background: #EF4444;
+            color: white;
+            border: none;
+            border-radius: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 15px;
+        }
+
+        .btn-secondary:hover {
+            background: #DC2626;
+            transform: translateY(-2px);
+        }
+
+        .loading-spinner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-spinner p {
+            color: white;
+            margin-top: 20px;
+            font-size: 1.125rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="title-bar">
+        <div class="title-content">
+            <h1>Smart Food Waste Classifier</h1>
+            <p class="title-subtitle">AI-Powered Waste Sorting Assistant</p>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="nav-menu">
+            <button class="nav-btn" onclick="window.location.href='/dashboard'">
+                <span class="nav-icon">🏠</span>
+                Home
+            </button>
+            <button class="nav-btn active">
+                <span class="nav-icon">📁</span>
+                Upload Image
+            </button>
+            <button class="nav-btn" onclick="window.location.href='/classify/camera'">
+                <span class="nav-icon">📷</span>
+                Camera
+            </button>
+            <button class="nav-btn" onclick="window.location.href='/logout'">
+                <span class="nav-icon">🚪</span>
+                Logout
+            </button>
+        </div>
+
+        <div class="content-section">
+            <div class="upload-box" id="uploadBox">
+                <input type="file" id="fileInput" accept="image/*" hidden>
+                <div class="upload-content">
+                    <div class="upload-icon">📸</div>
+                    <h3>Upload Waste Image</h3>
+                    <p>Click or drag image here</p>
+                    <button class="btn-primary" onclick="document.getElementById('fileInput').click()">
+                        Choose Image
+                    </button>
+                </div>
+            </div>
+
+            <div id="imagePreview" class="image-preview">
+                <img id="preview" src="" alt="Preview">
+                <button class="btn-secondary" onclick="resetUpload()">Upload Another</button>
+            </div>
+        </div>
+
+        <div id="loadingSpinner" class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Analyzing waste...</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
